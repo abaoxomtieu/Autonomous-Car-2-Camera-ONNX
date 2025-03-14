@@ -1,43 +1,56 @@
-# Autonomous car
+# 🚗 **Autonomous Car - Dual Camera ONNX Models**  
 
-## Models: 
+## 📌 **Models Used**  
 
-- **Ultra-Fast-Lane-Detection V1**: Camera 1
+- **Ultra-Fast-Lane-Detection V1** → *Camera 1*  
+- **ResNet18 (Backbone ImageNet)** → *Camera 2*  
 
-- **Resnet18 (Backbone ImageNet)**: Camera 2
+📥 **Download Models:**  
+[Google Drive - Model Files](https://drive.google.com/drive/folders/1vAAf1BOgRfjUqCCjFBnpJsnCcyH7CfnR?usp=sharing)  
 
+---
 
-## Camera setup
-![SETUP](./docs/camera_setup.png)
+## 📂 **Model Setup**  
 
-# Processing flow
-![FLOW](./docs/processing_low.png)
+| **Model File**                  | **Destination Folder**         |
+|----------------------------------|--------------------------------|
+| `model_16.onnx`                 | `classification/models/`       |
+| `tusimple_18_V1_fp32.onnx`      | `ultrafast/models/`            |
 
-### Clone repository:
+---
+
+## 📸 **Camera Setup**  
+📷 **Reference Image:**  
+![SETUP](./docs/camera_setup.png)  
+
+---
+
+## 🔄 **Processing Flow**  
+🛠 **Pipeline Overview:**  
+![FLOW](./docs/processing_low.png)  
+
+---
+
+## 🚀 **Installation & Setup**  
+
+### 1️⃣ **Clone Repository**  
 
 ```bash
 git clone https://github.com/abaoxomtieu/Autonomous-Car-2-Camera-ONNX.git
+cd Autonomous-Car-2-Camera-ONNX
 ```
 
-### Install dependencies:
+### 2️⃣ **Install Dependencies**  
 
 ```bash
 pip install -r requirements.txt
 ```
 
+---
 
-### Input:
-frame from 2 camera
+## 🎥 **Input & Output**  
 
-### Output:
-**Direction: STRAIGHT, LEFT, RIGHT**
+- **🖼 Input:** Frames from 2 cameras  
+- **📌 Output:** Direction prediction → **STRAIGHT, LEFT, RIGHT**  
 
-
-## install dependencies
- 
-```bash
-pip install -r requirements.txt
-```
-
-
-
+---
