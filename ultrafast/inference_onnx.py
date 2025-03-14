@@ -171,15 +171,15 @@ def process_output(
             (left_top[0] + right_top[0]) // 2,
             (left_top[1] + right_top[1]) // 2,
         )
-        if paint:
-            for pt in [left_top, right_top, top_center]:
-                cv2.circle(
-                    visualization_img,
-                    pt,
-                    5 if pt != top_center else 7,
-                    (0, 255, 255) if pt != top_center else (0, 0, 255),
-                    -1,
-                )
+        # if paint:
+        #     for pt in [left_top, right_top, top_center]:
+        #         cv2.circle(
+        #             visualization_img,
+        #             pt,
+        #             5 if pt != top_center else 7,
+        #             (0, 255, 255) if pt != top_center else (0, 0, 255),
+        #             -1,
+        #         )
 
         point_control_left, point_control_right = (left_top[0], height), (
             right_top[0],
@@ -195,6 +195,44 @@ def process_output(
             car_center_bottom[1] - top_center[1],
         )
         angle_deg = math.degrees(math.atan2(dx, dy))
+        if paint:
+            cv2.line(
+                visualization_img,
+                (car_center_bottom[0], top_center[1]),  # Start point
+                (top_center[0], top_center[1]),  # End point
+                (255, 0, 0),  # Blue color
+                2,
+            )
+            cv2.line(
+                visualization_img,
+                (car_center_bottom[0], car_center_bottom[1]),  # Start point
+                (car_center_bottom[0], top_center[1]),  # End point
+                (0, 255, 0),  # Green color
+                2,
+            )
+
+            cv2.putText(
+                visualization_img,
+                f"dx: {dx:.1f}",
+                (car_center_bottom[0], top_center[1] - 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.7,
+                (255, 0, 0),  # Blue color
+                2,
+            )
+
+            cv2.putText(
+                visualization_img,
+                f"dy: {dy:.1f}",
+                (
+                    car_center_bottom[0] - 100,
+                    (car_center_bottom[1] + top_center[1]) // 2,
+                ),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.7,
+                (0, 255, 0),  # Green color
+                2,
+            )
         direction = (
             "LEFT"
             if angle_deg < -(permission_rotate_angle)
