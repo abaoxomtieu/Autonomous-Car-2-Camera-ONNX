@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import math
 import os
-
+from loguru import logger
 model_type = ModelType.TUSIMPLE
 
 dirname = os.path.dirname(__file__)
@@ -119,10 +119,10 @@ def process_output(
         right_top = right_top_cache
 
     if not Have_lane:
-        print("return No Lane")
+        logger.info("NO LANE")
         return visualization_img, direction, Have_lane, left_top, right_top
     if not left_top or not right_top:
-        print("Not dectect left or right top")
+        logger.info("No leftop, righTop")
         return visualization_img, direction, Have_lane, left_top, right_top
     if paint:
         car_points = [

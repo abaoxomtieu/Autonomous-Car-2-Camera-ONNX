@@ -65,7 +65,8 @@ while cap.isOpened() and cap_.isOpened():
     direction_, prob_ = inference_(frame_)
     previous_.append(direction_)
     check_, straight_ratio_ = check_previous_directions(previous_, "STRAIGHT")
-    final_decision = direction_
+    if check_:
+        final_decision = direction_
     if frame_infer % skip_frames == 0 and check_:
         lanes_points, lanes_detected = inference.detect_lanes(frame)
         visualization_img, direction, Have_lane, left_top, right_top = process_output(
@@ -77,10 +78,12 @@ while cap.isOpened() and cap_.isOpened():
             calculate=True,
         )
         previous.append(direction)
-        check, straight_ratio = check_previous_directions(previous, direction, 10, 0.7)
-
-        if direction and check:
-            final_decision = direction
+        if direction:
+            check, straight_ratio = check_previous_directions(
+                previous, direction, 10, 0.7
+            )
+            if check:
+                final_decision = direction
             left_top_cache = left_top
             right_top_cache = right_top
     else:
