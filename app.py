@@ -9,7 +9,7 @@ from ultrafast.inference_onnx import process_output, inference
 from classification.inference_onnx import inference_
 
 # Open video sources
-cap = cv2.VideoCapture("./videos/higher.mp4")
+cap = cv2.VideoCapture("./videos/test_video.mp4")
 cap_ = cv2.VideoCapture("./videos/lower.mp4")
 
 real_car = False
@@ -42,11 +42,11 @@ previous = []
 temp_direction = 0
 straight_ratio = None
 final_decision = None
-left_top = None
-right_top = None
 left_top_cache = None
 right_top_cache = None
-
+left_points_90_cache = None
+right_points_90_cache = None
+Have_lane = True
 
 while cap.isOpened() and cap_.isOpened():
     frame_count += 1
@@ -62,36 +62,52 @@ while cap.isOpened() and cap_.isOpened():
     if not ret1 or not ret2:
         print("End of one or both videos")
         break
-    direction_, prob_ = inference_(frame_)
+    # direction_, _ = inference_(frame_)
+    direction_= "STRAIGHT"
     previous_.append(direction_)
     check_, straight_ratio_ = check_previous_directions(previous_, "STRAIGHT")
     if check_:
         final_decision = direction_
     if frame_infer % skip_frames == 0 and check_:
         lanes_points, lanes_detected = inference.detect_lanes(frame)
-        visualization_img, direction, Have_lane, left_top, right_top = process_output(
+        (
+            visualization_img,
+            direction,
+            Have_lane,
+            left_top,
+            right_top,
+            left_points_90,
+            right_points_90,
+        ) = process_output(
             frame,
             lanes_points=lanes_points,
-            left_top_cache=left_top,
-            right_top_cache=right_top,
+            left_top_cache=left_top_cache,
+            right_top_cache=right_top_cache,
+            left_points_90_cache=left_points_90_cache,
+            right_points_90_cache=right_points_90_cache,
             lanes_detected=lanes_detected,
             calculate=True,
         )
         previous.append(direction)
         if direction:
             check, straight_ratio = check_previous_directions(
-                previous, direction, 10, 0.7
+                previous, direction, 100, 0.7
             )
             if check:
                 final_decision = direction
+            print("lock")
             left_top_cache = left_top
             right_top_cache = right_top
+            left_points_90_cache = left_points_90
+            right_points_90_cache = right_points_90
     else:
-        visualization_img, direction, Have_lane, _, _ = process_output(
+        visualization_img, direction, Have_lane, _, _, _, _ = process_output(
             frame,
             lanes_points=lanes_points,
             left_top_cache=left_top_cache,
             right_top_cache=right_top_cache,
+            left_points_90_cache=left_points_90_cache,
+            right_points_90_cache=right_points_90_cache,
             lanes_detected=lanes_detected,
             calculate=False,
         )

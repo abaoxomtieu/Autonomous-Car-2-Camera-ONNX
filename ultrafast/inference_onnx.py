@@ -5,6 +5,7 @@ import numpy as np
 import math
 import os
 from loguru import logger
+
 model_type = ModelType.TUSIMPLE
 
 dirname = os.path.dirname(__file__)
@@ -22,12 +23,16 @@ car_center_top = (car_center_bottom[0], 0)
 
 
 def draw_lanes(
-    input_img, lanes_points, lanes_detected, draw_points=True, caculate=True
+    input_img,
+    lanes_points,
+    lanes_detected,
+    left_points_90=None,
+    right_points_90=None,
+    draw_points=True,
+    caculate=True,
 ):
     left_top = None
     right_top = None
-    left_bottom = None
-    right_bottom = None
     Have_lane = True
     visualization_img = cv2.resize(input_img, (1280, 720), interpolation=cv2.INTER_AREA)
     if lanes_detected[1] and lanes_detected[2] and caculate:
@@ -59,11 +64,11 @@ def draw_lanes(
         # Tính tọa độ của cạnh trên và cạnh dưới cho lane trái
         if left_points_90:
             left_top = min(left_points_90, key=lambda p: p[1])  # Điểm có y nhỏ nhất
-            left_bottom = max(left_points_90, key=lambda p: p[1])  # Điểm có y lớn nhất
+            # left_bottom = max(left_points_90, key=lambda p: p[1])  # Điểm có y lớn nhất
         # Tính tọa độ của cạnh trên và cạnh dưới cho lane phải
         if right_points_90:
             right_top = min(right_points_90, key=lambda p: p[1])
-            right_bottom = max(right_points_90, key=lambda p: p[1])
+            # right_bottom = max(right_points_90, key=lambda p: p[1])
 
         # Nếu có đủ điểm từ cả hai lane, tiến hành vẽ
         if len(left_points_90) > 0 and len(right_points_90) > 0:
@@ -78,6 +83,19 @@ def draw_lanes(
             Have_lane = False
 
     if draw_points:
+        logger.warning(left_points_90)
+        if left_points_90 and right_points_90:
+            if len(left_points_90) > 0 and len(right_points_90) > 0:
+                lane_segment_img = input_img.copy()
+                pts = np.vstack(
+                    (np.array(left_points_90), np.flipud(np.array(right_points_90)))
+                )
+                cv2.fillPoly(lane_segment_img, pts=[pts], color=(255, 191, 0))
+                visualization_img = cv2.addWeighted(
+                    visualization_img, 0.7, lane_segment_img, 0.3, 0
+                )
+            else:
+                Have_lane = False
         for lane_num, lane_points in enumerate(lanes_points):
             for lane_point in lane_points:
                 cv2.circle(
@@ -87,7 +105,14 @@ def draw_lanes(
                     lane_colors[lane_num],
                     -1,
                 )
-    return visualization_img, left_top, right_top, left_bottom, right_bottom, Have_lane
+    return (
+        visualization_img,
+        left_top,
+        right_top,
+        left_points_90,
+        right_points_90,
+        Have_lane,
+    )
 
 
 def process_output(
@@ -96,6 +121,8 @@ def process_output(
     lanes_detected=None,
     left_top_cache=None,
     right_top_cache=None,
+    left_points_90_cache=None,
+    right_points_90_cache=None,
     paint=True,
     resize_img=True,
     calculate=False,
@@ -108,11 +135,17 @@ def process_output(
         visualization_img,
         left_top,
         right_top,
-        _,
-        _,
+        left_points_90,
+        right_points_90,
         Have_lane,
     ) = draw_lanes(
-        frame, lanes_points, lanes_detected, draw_points=True, caculate=calculate
+        frame,
+        lanes_points,
+        lanes_detected,
+        left_points_90_cache,
+        right_points_90_cache,
+        draw_points=True,
+        caculate=calculate,
     )
     if not calculate:
         left_top = left_top_cache
@@ -120,10 +153,10 @@ def process_output(
 
     if not Have_lane:
         logger.info("NO LANE")
-        return visualization_img, direction, Have_lane, left_top, right_top
+        return visualization_img, direction, Have_lane, left_top, right_top, None, None
     if not left_top or not right_top:
         logger.info("No leftop, righTop")
-        return visualization_img, direction, Have_lane, left_top, right_top
+        return visualization_img, direction, Have_lane, left_top, right_top, None, None
     if paint:
         car_points = [
             car_point_left,
@@ -185,4 +218,12 @@ def process_output(
             (visualization_img.shape[1] // 2, visualization_img.shape[0] // 2),
         )
 
-    return visualization_img, direction, Have_lane, left_top, right_top
+    return (
+        visualization_img,
+        direction,
+        Have_lane,
+        left_top,
+        right_top,
+        left_points_90,
+        right_points_90,
+    )
