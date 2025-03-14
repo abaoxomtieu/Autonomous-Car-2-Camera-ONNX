@@ -1,5 +1,6 @@
 import cv2
 
+
 def check_previous_directions(
     previous, value="STRAIGHT", number_of_last_frames=30, threshold=0.8
 ):
@@ -9,9 +10,11 @@ def check_previous_directions(
 
     last_samples = previous[-number_of_last_frames:]
 
-    straight_count = sum(1 for direction in last_samples if direction == value)
-    straight_ratio = straight_count / number_of_last_frames
-    return straight_ratio >= threshold, straight_ratio
+    direction_count = sum(1 for direction in last_samples if direction == value)
+    direction_ratio = direction_count / number_of_last_frames
+    return direction_ratio >= threshold, direction_ratio
+
+
 def visualize_frames(
     origin_capture=(None, None),
     dir=(None, None),

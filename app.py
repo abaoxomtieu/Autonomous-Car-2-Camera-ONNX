@@ -29,7 +29,7 @@ visualization_img_cache = None
 
 
 frame_infer = 0
-skip_frames = 5
+skip_frames = 10
 
 # model_
 previous_ = []
@@ -47,6 +47,7 @@ right_top_cache = None
 left_points_90_cache = None
 right_points_90_cache = None
 Have_lane = True
+previous_direction = None
 
 while cap.isOpened() and cap_.isOpened():
     frame_count += 1
@@ -62,13 +63,13 @@ while cap.isOpened() and cap_.isOpened():
     if not ret1 or not ret2:
         print("End of one or both videos")
         break
-    # direction_, _ = inference_(frame_)
-    direction_= "STRAIGHT"
+    direction_, _ = inference_(frame_)
+    # direction_ = "STRAIGHT"
     previous_.append(direction_)
-    check_, straight_ratio_ = check_previous_directions(previous_, "STRAIGHT")
-    if check_:
+    should_process_, straight_ratio_ = check_previous_directions(previous_, direction_)
+    if should_process_:
         final_decision = direction_
-    if frame_infer % skip_frames == 0 and check_:
+    if frame_infer % skip_frames == 0 and should_process_ and direction_ == "STRAIGHT":
         lanes_points, lanes_detected = inference.detect_lanes(frame)
         (
             visualization_img,
@@ -90,12 +91,13 @@ while cap.isOpened() and cap_.isOpened():
         )
         previous.append(direction)
         if direction:
-            check, straight_ratio = check_previous_directions(
-                previous, direction, 100, 0.7
+            should_process, straight_ratio = check_previous_directions(
+                previous, direction, 10, 0.7
             )
-            if check:
+            if should_process:
                 final_decision = direction
-            print("lock")
+                previous_direction = direction
+
             left_top_cache = left_top
             right_top_cache = right_top
             left_points_90_cache = left_points_90
@@ -111,8 +113,9 @@ while cap.isOpened() and cap_.isOpened():
             lanes_detected=lanes_detected,
             calculate=False,
         )
-        if direction_ == "STRAIGHT" and check_:
-            final_decision = direction
+        if direction_ == "STRAIGHT" and should_process_:
+            final_decision = previous_direction
+
     if visualization_img is None:
         print("failed")
         break

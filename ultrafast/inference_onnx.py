@@ -83,7 +83,6 @@ def draw_lanes(
             Have_lane = False
 
     if draw_points:
-        logger.warning(left_points_90)
         if left_points_90 and right_points_90:
             if len(left_points_90) > 0 and len(right_points_90) > 0:
                 lane_segment_img = input_img.copy()
