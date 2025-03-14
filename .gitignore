@@ -1,0 +1,8 @@
+# Ignore all .onnx model files
+*.onnx
+**/__pycache__/
+
+# Ignore specific model directories if needed
+**/*.onnx
+.DS_Store
+a.ipynb

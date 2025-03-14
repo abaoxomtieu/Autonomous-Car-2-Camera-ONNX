@@ -1,0 +1,9 @@
+pygame
+onnx
+onnxruntime
+opencv-python
+serial
+pandas
+matplotlib
+scipy
+pillow
