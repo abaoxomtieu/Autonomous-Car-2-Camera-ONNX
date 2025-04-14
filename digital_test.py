@@ -13,9 +13,11 @@ serial_port = serial.Serial(
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
 )
+serial_port.read()
 
 if not serial_port.is_open:
     serial_port.open()
+
 
 
 # Wait a second to let the port initialize

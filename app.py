@@ -7,6 +7,7 @@ from utils.helper import (
 )
 from ultrafast.inference_onnx import process_output, inference
 from classification.inference_onnx import inference_
+from loguru import logger
 
 # Open video sources
 cap = cv2.VideoCapture("./videos/test_video.mp4")
@@ -19,6 +20,12 @@ if real_car:
 new_width, new_height = new_target_dimensions(cap, 1280, 720)
 new_width_, new_height_ = new_target_dimensions(cap, 224, 224)
 
+direction_dict = {
+    "RIGHT_BACK": "X",
+    "LEFT_BACK": "Y",
+    "RIGHT_STOP": "Q",
+    "LEFT_STOP": "Z",
+}
 # Initialize FPS calculation variables
 frame_count = 0
 start_time = time.time()
@@ -49,6 +56,9 @@ right_points_90_cache = None
 Have_lane = True
 previous_direction = None
 
+previous_final_decision = None
+previous_time = time.time()
+allow_push = True
 while cap.isOpened() and cap_.isOpened():
     frame_count += 1
     frame_infer += 1
@@ -63,8 +73,8 @@ while cap.isOpened() and cap_.isOpened():
     if not ret1 or not ret2:
         print("End of one or both videos")
         break
-    direction_, _ = inference_(frame_)
-    # direction_ = "STRAIGHT"
+    # direction_, _ = inference_(frame_)
+    direction_ = "STRAIGHT"
     previous_.append(direction_)
     should_process_, straight_ratio_ = check_previous_directions(previous_, direction_)
     if should_process_:
@@ -116,6 +126,11 @@ while cap.isOpened() and cap_.isOpened():
         if direction_ == "STRAIGHT" and should_process_:
             final_decision = previous_direction
 
+    if final_decision != "STRAIGHT" and time.time() - previous_time >= 1.5:
+        previous_time = time.time()
+
+        logger.info("PUSH")
+
     if visualization_img is None:
         print("failed")
         break
@@ -124,8 +139,6 @@ while cap.isOpened() and cap_.isOpened():
 
     if elapsed_time >= 1.0:
         fps = frame_count / elapsed_time
-
-        # Reset counters
         frame_count = 0
         start_time = time.time()
 
